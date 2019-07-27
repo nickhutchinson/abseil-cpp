@@ -1,0 +1,682 @@
+# Internal-only implementation classes for Abseil Random
+if (MSVC AND CMAKE_SYSTEM_PROCESSOR STREQUAL "AMD64")
+    set(ABSL_RANDOM_RANDEN_COPTS "${ABSL_RANDOM_HWAES_MSVC_X64_FLAGS}")
+elseif (NOT MSVC AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+  set(ABSL_RANDOM_RANDEN_COPTS "${ABSL_RANDOM_HWAES_X64_FLAGS}")
+else ()
+  set(ABSL_RANDOM_RANDEN_COPTS "")
+endif ()
+
+absl_cc_library(
+  NAME
+    random_internal_traits
+  HDRS
+    "traits.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::config
+)
+
+absl_cc_library(
+  NAME
+    random_internal_distribution_caller
+  HDRS
+    "distribution_caller.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+)
+
+absl_cc_library(
+  NAME
+    random_internal_distributions
+  HDRS
+    "distributions.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_distribution_caller
+    absl::random_internal_fast_uniform_bits
+    absl::random_internal_fastmath
+    absl::random_internal_traits
+    absl::random_internal_uniform_helper
+    absl::type_traits
+    absl::strings
+    absl::span
+)
+
+absl_cc_library(
+  NAME
+    random_internal_fast_uniform_bits
+  HDRS
+    "fast_uniform_bits.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+)
+
+absl_cc_library(
+  NAME
+    random_internal_seed_material
+  SRCS
+    "seed_material.cc"
+  HDRS
+    "seed_material.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_fast_uniform_bits
+    absl::base
+    absl::core_headers
+    absl::strings
+    absl::optional
+    absl::span
+)
+
+absl_cc_library(
+  NAME
+    random_internal_pool_urbg
+  SRCS
+    "pool_urbg.cc"
+  HDRS
+    "pool_urbg.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_randen
+    absl::random_internal_seed_material
+    absl::random_internal_traits
+    absl::base
+    absl::config
+    absl::core_headers
+    absl::endian
+    absl::random_seed_gen_exception
+    absl::span
+    Threads::Threads
+)
+
+absl_cc_library(
+  NAME
+    random_internal_explicit_seed_seq
+  TESTONLY
+  HDRS
+    "explicit_seed_seq.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+)
+
+absl_cc_library(
+  NAME
+    random_internal_sequence_urbg
+  TESTONLY
+  HDRS
+    "sequence_urbg.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+)
+
+absl_cc_library(
+  NAME
+    random_internal_salted_seed_seq
+  HDRS
+    "salted_seed_seq.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_seed_material
+    absl::inlined_vector
+    absl::type_traits
+    absl::optional
+    absl::span
+)
+
+absl_cc_library(
+  NAME
+    random_internal_iostream_state_saver
+  HDRS
+    "iostream_state_saver.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::type_traits
+    absl::int128
+)
+
+absl_cc_library(
+  NAME
+    random_internal_distribution_impl
+  HDRS
+    "distribution_impl.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_fastmath
+    absl::random_internal_traits
+    absl::bits
+    absl::config
+    absl::int128
+)
+
+absl_cc_library(
+  NAME
+    random_internal_fastmath
+  HDRS
+    "fastmath.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::bits
+)
+
+absl_cc_library(
+  NAME
+    random_internal_nonsecure_base
+  HDRS
+    "nonsecure_base.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_pool_urbg
+    absl::random_internal_salted_seed_seq
+    absl::random_internal_seed_material
+    absl::core_headers
+    absl::type_traits
+    absl::strings
+    absl::optional
+    absl::span
+)
+
+absl_cc_library(
+  NAME
+    random_internal_pcg_engine
+  HDRS
+    "pcg_engine.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_fastmath
+    absl::random_internal_iostream_state_saver
+    absl::config
+    absl::type_traits
+    absl::int128
+)
+
+absl_cc_library(
+  NAME
+    random_internal_randen_engine
+  HDRS
+    "randen_engine.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_iostream_state_saver
+    absl::random_internal_randen
+    absl::type_traits
+)
+
+absl_cc_library(
+  NAME
+    random_internal_platform
+  HDRS
+    "randen_traits.h"
+    "randen-keys.inc"
+    "platform.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+)
+
+absl_cc_library(
+  NAME
+    random_internal_randen
+  SRCS
+    "randen.cc"
+  HDRS
+    "randen.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_platform
+    absl::random_internal_randen_hwaes
+    absl::random_internal_randen_slow
+    absl::base
+)
+
+absl_cc_library(
+  NAME
+    random_internal_randen_slow
+  SRCS
+    "randen_slow.cc"
+  HDRS
+    "randen_slow.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_platform
+)
+
+absl_cc_library(
+  NAME
+    random_internal_randen_hwaes
+  SRCS
+    "randen_detect.cc"
+  HDRS
+    "randen_detect.h"
+    "randen_hwaes.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_platform
+    absl::random_internal_randen_hwaes_impl
+)
+
+absl_cc_library(
+  NAME
+    random_internal_randen_hwaes_impl
+  SRCS
+    "randen_hwaes.cc"
+    "randen_hwaes.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+    ${ABSL_RANDOM_RANDEN_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_platform
+)
+
+absl_cc_binary(
+  NAME
+    gaussian_distribution_gentables
+  SRCS
+    "gaussian_distribution_gentables.cc"
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::core_headers
+    absl::random_distributions
+)
+
+absl_cc_library(
+  NAME
+    random_internal_distribution_test_util
+  TESTONLY
+  SRCS
+    "chi_square.cc"
+    "distribution_test_util.cc"
+  HDRS
+    "chi_square.h"
+    "distribution_test_util.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::base
+    absl::core_headers
+    absl::strings
+    absl::str_format
+    absl::span
+)
+
+absl_cc_test(
+  NAME
+    random_internal_traits_test
+  SRCS
+    "traits_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_traits
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_distribution_impl_test
+  SRCS
+    "distribution_impl_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_distribution_impl
+    absl::bits
+    absl::flags
+    absl::int128
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_distribution_test_util_test
+  SRCS
+    "distribution_test_util_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_distribution_test_util
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_fastmath_test
+  SRCS
+    "fastmath_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_fastmath
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_explicit_seed_seq_test
+  SRCS
+    "explicit_seed_seq_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_explicit_seed_seq
+    absl::random_seed_sequences
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_salted_seed_seq_test
+  SRCS
+    "salted_seed_seq_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_salted_seed_seq
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_chi_square_test
+  SRCS
+    "chi_square_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_distribution_test_util
+    absl::core_headers
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_fast_uniform_bits_test
+  SRCS
+    "fast_uniform_bits_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_fast_uniform_bits
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_nonsecure_base_test
+  SRCS
+    "nonsecure_base_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_nonsecure_base
+    absl::random
+    absl::random_distributions
+    absl::random_seed_sequences
+    absl::strings
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_seed_material_test
+  SRCS
+    "seed_material_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_seed_material
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_pool_urbg_test
+  SRCS
+    "pool_urbg_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_pool_urbg
+    absl::type_traits
+    absl::span
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_pcg_engine_test
+  SRCS
+    "pcg_engine_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_explicit_seed_seq
+    absl::random_internal_pcg_engine
+    absl::time
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_randen_engine_test
+  SRCS
+    "randen_engine_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_explicit_seed_seq
+    absl::random_internal_randen_engine
+    absl::base
+    absl::strings
+    absl::time
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_randen_test
+  SRCS
+    "randen_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_randen
+    absl::type_traits
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_randen_slow_test
+  SRCS
+    "randen_slow_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_randen_slow
+    gmock_main
+)
+
+absl_cc_test(
+  NAME
+    random_internal_randen_hwaes_test
+  SRCS
+    "randen_hwaes_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_platform
+    absl::random_internal_randen_hwaes
+    absl::random_internal_randen_hwaes_impl
+    absl::base
+    absl::str_format
+    gmock_main
+)
+
+absl_cc_library(
+  NAME
+    random_internal_nanobenchmark
+  SRCS
+    "nanobenchmark.cc"
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  HDRS
+    "nanobenchmark.h"
+  DEPS
+    absl::random_internal_platform
+    absl::random_internal_randen_engine
+    absl::base
+)
+
+absl_cc_library(
+  NAME
+    random_internal_uniform_helper
+  HDRS
+    "uniform_helper.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_distribution_impl
+    absl::random_internal_fast_uniform_bits
+    absl::random_internal_iostream_state_saver
+    absl::random_internal_traits
+    absl::core_headers
+    absl::type_traits
+)
+
+absl_cc_test(
+  NAME
+    random_internal_nanobenchmark_test
+  SRCS
+    "nanobenchmark_test.cc"
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_nanobenchmark
+    absl::base
+    absl::strings
+)
+
+absl_cc_test(
+  NAME
+    random_internal_randen_benchmarks
+  SRCS
+    "randen_benchmarks.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+    ${ABSL_RANDOM_RANDEN_COPTS}
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_nanobenchmark
+    absl::random_internal_platform
+    absl::random_internal_randen
+    absl::random_internal_randen_engine
+    absl::random_internal_randen_hwaes
+    absl::random_internal_randen_hwaes_impl
+    absl::random_internal_randen_slow
+    absl::base
+    absl::strings
+)
+
+absl_cc_test(
+  NAME
+    random_internal_iostream_state_saver_test
+  SRCS
+    "iostream_state_saver_test.cc"
+  LINKOPTS
+    ${ABSL_DEFAULT_LINKOPTS}
+  DEPS
+    absl::random_internal_iostream_state_saver
+    gmock_main
+)

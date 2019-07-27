@@ -246,6 +246,71 @@ function(absl_cc_test)
   add_test(NAME ${_NAME} COMMAND ${_NAME})
 endfunction()
 
+# absl_cc_binary()
+#
+# CMake function to imitate Bazel's cc_binary rule.
+#
+# Parameters:
+# NAME: name of target (see Usage below)
+# SRCS: List of source files for the binary
+# DEPS: List of other libraries to be linked in to the binary targets
+# COPTS: List of private compile options
+# DEFINES: List of public defines
+# LINKOPTS: List of link options
+#
+# Note:
+# By default, absl_cc_binary will always create a binary named absl_${NAME}.
+#
+# Usage:
+# absl_cc_library(
+#   NAME
+#     awesome
+#   HDRS
+#     "a.h"
+#   SRCS
+#     "a.cc"
+#   PUBLIC
+# )
+#
+# absl_cc_binary(
+#   NAME
+#     awesome_binary
+#   SRCS
+#     "awesome_binary.cc"
+#   DEPS
+#     absl::awesome
+# )
+function(absl_cc_binary)
+  cmake_parse_arguments(ABSL_CC_BINARY
+    ""
+    "NAME"
+    "SRCS;COPTS;DEFINES;LINKOPTS;DEPS"
+    ${ARGN}
+  )
+
+  set(_NAME "absl_${ABSL_CC_BINARY_NAME}")
+  add_executable(${_NAME} "")
+  target_sources(${_NAME} PRIVATE ${ABSL_CC_BINARY_SRCS})
+  target_include_directories(${_NAME}
+    PUBLIC ${ABSL_COMMON_INCLUDE_DIRS}
+  )
+  target_compile_definitions(${_NAME}
+    PUBLIC ${ABSL_CC_BINARY_DEFINES}
+  )
+  target_compile_options(${_NAME}
+    PRIVATE ${ABSL_CC_BINARY_COPTS}
+  )
+  target_link_libraries(${_NAME}
+    PUBLIC ${ABSL_CC_BINARY_DEPS}
+    PRIVATE ${ABSL_CC_BINARY_LINKOPTS}
+  )
+
+  # Add all Abseil targets to a a folder in the IDE for organization.
+  set_property(TARGET ${_NAME} PROPERTY FOLDER ${ABSL_IDE_FOLDER}/internal)
+
+  set_property(TARGET ${_NAME} PROPERTY CXX_STANDARD ${ABSL_CXX_STANDARD})
+  set_property(TARGET ${_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+endfunction()
 
 function(check_target my_target)
   if(NOT TARGET ${my_target})
